@@ -46,11 +46,15 @@ for links in soup.find_all('a',text='Scorecard'):
                 pom_team = str(pom_player[1]).split("</span>")[0]
                 # print(pom_team)
                 #print ("{},{}".format(player_of_match,pom_team))
-            for toss in soup_class.find_all('div',attrs={'class': 'match-detail--right'}):
-                toss_report = toss
-                print(toss_report)
-            datum = str(datum.text)
-            contents = datum.split(",")
-            venue = str(contents[1])
-            # print("{} is played between {} and {} at {} on {} and the result is {} and pom is {} from {}, and toss report is {}".format(contents[0],team1,team2,venue.split(" ")[5],contents[2],result,player_of_match,pom_team,toss_report))
+            for toss in soup_class.find_all('h4',text='Toss'):
+                toss_report = str(toss).split('\"')[1]
+                toss_report = int(toss_report)
+                toss_report += 2
+                # print (type(toss_report))
+                for toss_data in soup_class.find_all('span',attrs={'data-reactid':str(toss_report)}):
+                    # print (toss_data.text)
+                    datum = str(datum.text)
+                    contents = datum.split(",")
+                    venue = str(contents[1])
+                    print("{} is played between {} and {} at {} on {} and the result is {} and pom is {} from {}, and toss report is {}".format(contents[0],team1,team2,venue.split(" ")[5],contents[2],result,player_of_match,pom_team,toss_data.text))
 print (c)
