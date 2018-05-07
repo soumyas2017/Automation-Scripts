@@ -1,8 +1,9 @@
 from bs4 import BeautifulSoup
 import string
 import requests
-url = "https://en.wikipedia.org/wiki/2008_Indian_Premier_League"
+# url = "https://en.wikipedia.org/wiki/2008_Indian_Premier_League"
 # url = 'https://en.wikipedia.org/wiki/2017_Indian_Premier_League'
+url = 'https://en.wikipedia.org/wiki/2018_Indian_Premier_League'
 r = requests.get(url)
 data  = r.text
 soup = BeautifulSoup(data,'lxml')
@@ -14,8 +15,9 @@ urls = list()
 #     print("Wrote Successfully")
 #print (soup)
 c=0
-for links in soup.find_all('a',class_='external text'):
-    if links.string == "Scorecard":
+# for links in soup.find_all('a',class_='external text'):
+for links in soup.find_all('a',text='Scorecard'):
+    # if links.string == "Scorecard":
         c +=1
         data = str(links).split(" ")
         urls = str(data[3]).split('\"')
@@ -34,15 +36,21 @@ for links in soup.find_all('a',class_='external text'):
                 # pom = pom.replace("</span","")
                 # pom = BeautifulSoup(str(pom),'lxml')
                 # pom = pom.get_text()
-                pom = str(pom).split("&amp;lpos=cricket:game:scorecard:player\">")
-                #print (pom)
+                if '&amp;lpos=cricket:game:scorecard:player' in pom:
+                    pom = str(pom).split("&amp;lpos=cricket:game:scorecard:player\">")
+                else:
+                    pom = str(pom).split("&amp;lpos=cricket:game:game:player\">")
+                # print (pom)
                 pom_player = str(pom[1]).split("<span>")
                 player_of_match = pom_player[0]
                 pom_team = str(pom_player[1]).split("</span>")[0]
                 # print(pom_team)
                 #print ("{},{}".format(player_of_match,pom_team))
+            for toss in soup_class.find_all('div',attrs={'class': 'match-detail--right'}):
+                toss_report = toss
+                print(toss_report)
             datum = str(datum.text)
             contents = datum.split(",")
             venue = str(contents[1])
-            print("{} is played between {} and {} at {} on {} and the result is {} and pom is {} from {}".format(contents[0],team1,team2,venue.split(" ")[5],contents[2],result,player_of_match,pom_team))
+            # print("{} is played between {} and {} at {} on {} and the result is {} and pom is {} from {}, and toss report is {}".format(contents[0],team1,team2,venue.split(" ")[5],contents[2],result,player_of_match,pom_team,toss_report))
 print (c)
