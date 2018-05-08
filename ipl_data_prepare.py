@@ -36,16 +36,25 @@ for links in soup.find_all('a',text='Scorecard'):
                 # pom = pom.replace("</span","")
                 # pom = BeautifulSoup(str(pom),'lxml')
                 # pom = pom.get_text()
-                if '&amp;lpos=cricket:game:scorecard:player' in pom:
+                if '&amp;lpos=cricket:game:scorecard:player' in str(pom):
                     pom = str(pom).split("&amp;lpos=cricket:game:scorecard:player\">")
                 else:
                     pom = str(pom).split("&amp;lpos=cricket:game:game:player\">")
-                # print (pom)
+                # print (';lpos=cricket:game:scorecard:player' in str(pom))
                 pom_player = str(pom[1]).split("<span>")
                 player_of_match = pom_player[0]
                 pom_team = str(pom_player[1]).split("</span>")[0]
                 # print(pom_team)
                 #print ("{},{}".format(player_of_match,pom_team))
+            for find_team1_score in soup_class.find_all('div',attrs={'class': 'cscore_score','data-reactid':'31'}):
+                team1_score = find_team1_score.text
+                # print (team1_score)
+            for find_team2_score in soup_class.find_all('div',attrs={'class': 'cscore_score','data-reactid':'40'}):
+                team2_score = find_team2_score.text
+                # print (team2_score)
+            for find_team1_player in soup_class.find_all('div',attrs={'class': 'player-name'}):
+                team1_player = find_team1_player.text
+                print (team1_player)
             for toss in soup_class.find_all('h4',text='Toss'):
                 toss_report = str(toss).split('\"')[1]
                 toss_report = int(toss_report)
@@ -56,5 +65,5 @@ for links in soup.find_all('a',text='Scorecard'):
                     datum = str(datum.text)
                     contents = datum.split(",")
                     venue = str(contents[1])
-                    print("{} is played between {} and {} at {} on {} and the result is {} and pom is {} from {}, and toss report is {}".format(contents[0],team1,team2,venue.split(" ")[5],contents[2],result,player_of_match,pom_team,toss_data.text))
+                    # print("{} is played between {},scored {} and {} scored {} at {} on {} and the result is {} and pom is {} from {}, and toss report is {}".format(contents[0],team1,team1_score,team2,team2_score,venue.split(" ")[5],contents[2],result,player_of_match,pom_team,toss_data.text))
 print (c)
