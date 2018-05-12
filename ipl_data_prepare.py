@@ -2,9 +2,10 @@ from bs4 import BeautifulSoup
 import requests
 import re
 if __name__ == '__main__':
-    url = "https://en.wikipedia.org/wiki/2008_Indian_Premier_League"
+    # url = "https://en.wikipedia.org/wiki/2008_Indian_Premier_League"
     # url = 'https://en.wikipedia.org/wiki/2017_Indian_Premier_League'
     # url = 'https://en.wikipedia.org/wiki/2018_Indian_Premier_League'
+    url = 'https://en.wikipedia.org/wiki/2012_Indian_Premier_League'
     r = requests.get(url)
     data  = r.text
     soup = BeautifulSoup(data,'lxml')
@@ -83,7 +84,7 @@ if __name__ == '__main__':
                         # print (umpire)
                         try:
                             umpire = umpire.split(" ")
-                            print (umpire)
+                            # print (umpire)
                             # test = ",".join(umpire[0])
                             # test = test.split()
                             # print(test)
@@ -92,43 +93,67 @@ if __name__ == '__main__':
                             # else:
                             #     print("False")
                             # print(type(test))
+                            
                             if len(umpire[0]) == 2:
                                 parts_0 = umpire[0].split()
-                                print (parts_0)
+                                # print (parts_0)
                             else:
                                 parts_0 = re.findall('[A-Z][^A-Z]*',umpire[0])
-                                print (parts_0)
+                                # print (parts_0)
                             parts_1 = re.findall('[A-Z][^A-Z]*',umpire[1])
-                            print (parts_1)
+                            # print (parts_1)
                             if len(parts_0) == 2:
-                                print ('{},{} {}'.format(parts_0[0],parts_0[1],umpire[1]))
+                                print ('Field Umpires - > {},{} {}'.format(parts_0[0],parts_0[1],umpire[1]))
                             elif len(parts_1) == 2 and len(umpire)>=3:
-                                print ('{} {},{} {}'.format(umpire[0],parts_1[0],parts_1[1],umpire[2]))
+                                print ('Field Umpires - > {} {},{} {}'.format(umpire[0],parts_1[0],parts_1[1],umpire[2]))
                             else:
-                                print ('{} {},{}'.format(umpire[0],parts_1[0],parts_1[1]))
+                                if (parts_1[1] == 'G'):
+                                    parts_1[1] = str(parts_1[1]).replace("G","GA Pratapkumar")
+                                    print ('Field Umpires - > {} {},{}'.format(umpire[0],parts_1[0],parts_1[1]))
+                                else:
+                                    print ('Field Umpires - > {} {},{}'.format(umpire[0],parts_1[0],parts_1[1]))
                             # print (umpire[0])
                             # print (parts[0])
                             # print (parts[1])
                             # print (umpire[2])
                             
                         except(IndexError):
-                            print ('{} {},{}'.format(umpire[0],parts_0[0],parts_0[1]))
+                            print ('Field Umpires Ex - > {} {},{}'.format(umpire[0],parts_0[0],parts_0[1]))
                         # single_umpire = datum.split(",")
                         # single_umpire = str(contents[1])
                 for tv_umpire in soup_class.find_all('h4',text='TV Umpires'):
                     tv_umpire = str(tv_umpire).split('\"')[1]
                     tv_umpire = int(tv_umpire)
                     tv_umpire += 1
-                    print(tv_umpire)
+                    # print(tv_umpire)
                     for tv_single_umpire in soup_class.find_all('div',attrs={'class':'match-detail--right','data-reactid':str(tv_umpire)}):
                         tv_umpire = tv_single_umpire.text
-                        print (tv_umpire)
+                        print ("TV Umpire -> {}" .format(tv_umpire))
                     # tv_umpire = "No Umpires"
-                for find_field_umpires in soup_class.find_all('h4',text='Umpires'):
-                    field_umpires = str(find_field_umpires).split('\"')[1]
-                    field_umpires = int(field_umpires)
-                    field_umpires += 1
-                    print(field_umpires)
+                # for find_field_umpires in soup_class.find_all('h4',text='Umpires'):
+                #     field_umpires = str(find_field_umpires).split('\"')[1]
+                #     field_umpires = int(field_umpires)
+                #     field_umpires += 1
+                #     print(field_umpires)
+                for reserve_umpire in soup_class.find_all('h4',text='Reserve Umpire'):
+                    reserve_umpire = str(reserve_umpire).split('\"')[1]
+                    reserve_umpire = int(reserve_umpire)
+                    reserve_umpire += 1
+                    # print(tv_umpire)
+                    for reserve_single_umpire in soup_class.find_all('div',attrs={'class':'match-detail--right','data-reactid':str(reserve_umpire)}):
+                        reserve_umpire = reserve_single_umpire.text
+                        print ("Reserve Umpire -> {}" .format(reserve_umpire))
+                
+                for referee in soup_class.find_all('h4',text='Match Referee'):
+                    referee = str(referee).split('\"')[1]
+                    referee = int(referee)
+                    referee += 1
+                    # print(tv_umpire)
+                    for match_referee in soup_class.find_all('div',attrs={'class':'match-detail--right','data-reactid':str(referee)}):
+                        referee = match_referee.text
+                        print ("Match Referee -> {}" .format(referee))
+                
+
                 for toss in soup_class.find_all('h4',text='Toss'):
                     toss_report = str(toss).split('\"')[1]
                     toss_report = int(toss_report)
