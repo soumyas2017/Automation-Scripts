@@ -1,11 +1,23 @@
 from bs4 import BeautifulSoup
 import requests
 import re
+import csv
+def csv_write(data_list):
+    with open('C:\\Users\\Soumya\\ipl_data.csv', 'w') as csvfile:
+        fieldnames = ['Field_umpire1', 'Field_umpire2','TV_umpire','Reserve_umpire','Referee','Match','Team1','Team2','Team1_score','Team1_overs','Team1_RR','Team2_score','Team2_overs','Team2_RR','Venue','Schedule','Result','Player_of_match','Player_of_match_team','Toss','Season']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        length = len(data_list)
+        print (length)
+        for i in range(0,48,1):
+            print (data_list[i])
+            writer.writerow(data_list[i])
+        # writer.writerows(data_list)
 if __name__ == '__main__':
     # url = "https://en.wikipedia.org/wiki/2008_Indian_Premier_League"
     # url = 'https://en.wikipedia.org/wiki/2017_Indian_Premier_League'
-    url = 'https://en.wikipedia.org/wiki/2018_Indian_Premier_League'
-    # url = 'https://en.wikipedia.org/wiki/2012_Indian_Premier_League'
+    # url = 'https://en.wikipedia.org/wiki/2018_Indian_Premier_League'
+    url = 'https://en.wikipedia.org/wiki/2012_Indian_Premier_League'
     r = requests.get(url)
     data  = r.text
     soup = BeautifulSoup(data,'lxml')
@@ -17,6 +29,7 @@ if __name__ == '__main__':
     player_of_match =""
     pom_team = ""
     umpire = ""
+    match_data_holder = list()
     c=0
     Match_data = dict()
     # Fetching Scorecard from above url
@@ -38,6 +51,7 @@ if __name__ == '__main__':
             # Getting result
             for result in soup_class.find_all('span',attrs={'class': 'cscore_notes_game'}):
                 result = result.text
+                # print (result)
             # Fetching Player of the match
             for pom in soup_class.find_all('a',attrs={'class': 'gp__cricket__player-match__player__detail__link','data-reactid':'53'}):
                 if '&amp;lpos=cricket:game:scorecard:player' in str(pom):
@@ -119,21 +133,54 @@ if __name__ == '__main__':
                     referee = match_referee.text
                     Match_data['Referee'] = referee
                     # Finding Overs and Run rate played by both teams
-            for dat in soup_class.find_all('div', class_='cell'):
-                if dat.text == 'TOTAL':
-                    team1_ov = dat['data-reactid']
-                    # print (team1_ov)
-                    team1_ov = int(team1_ov)
-                    team1_ov += 1
-                    # print (team1_ov)
-                    for get_overs in soup_class.find_all('div',attrs={'class':'cell','data-reactid':str(team1_ov)}):
-                        get_played_overs = get_overs.text
-                        split_comma = get_played_overs.split(",")
-                        rr_list.append(str(split_comma[1]).split(")")[0].split(":")[1].strip())
-                        rr_overs.append(str(split_comma[0]).split("(")[1].split(" ")[0].strip())
-                        # print (rr_list)
-                        # print (rr_overs)
-
+            if (result != 'Match abandoned without a ball bowled') :
+                # print ("inn")
+                for dat in soup_class.find_all('div', class_='cell'):
+                    # print ("Inside Dat")
+                    if dat.text == 'TOTAL':
+                        team1_ov = dat['data-reactid']
+                        # print (team1_ov)
+                        team1_ov = int(team1_ov)
+                        team1_ov += 1
+                        # print (team1_ov)
+                        for get_overs in soup_class.find_all('div',attrs={'class':'cell','data-reactid':str(team1_ov)}):
+                            get_played_overs = get_overs.text
+                            split_comma = get_played_overs.split(",")
+                            rr_list.append(str(split_comma[1]).split(")")[0].split(":")[1].strip())
+                            rr_overs.append(str(split_comma[0]).split("(")[1].split(" ")[0].strip())
+                            # print (rr_list)
+                            # print (rr_overs)
+            else:
+                rr_list = ['0','0']
+                rr_overs = ['0.00','0.00']
+                Match_data['Team1_score'] = "0"
+                Match_data['Team2_score'] = "0"
+                Match_data['Player_of_match'] = None
+                Match_data['Player_of_match_team'] = None
+            if (result != 'No result (abandoned with a toss)') :
+                # print ("inn NR")
+                for dat in soup_class.find_all('div', class_='cell'):
+                    # print ("Inside Dat")
+                    if dat.text == 'TOTAL':
+                        team1_ov = dat['data-reactid']
+                        # print (team1_ov)
+                        team1_ov = int(team1_ov)
+                        team1_ov += 1
+                        # print (team1_ov)
+                        for get_overs in soup_class.find_all('div',attrs={'class':'cell','data-reactid':str(team1_ov)}):
+                            get_played_overs = get_overs.text
+                            split_comma = get_played_overs.split(",")
+                            rr_list.append(str(split_comma[1]).split(")")[0].split(":")[1].strip())
+                            rr_overs.append(str(split_comma[0]).split("(")[1].split(" ")[0].strip())
+                            # print (rr_list)
+                            # print (rr_overs)
+            else:
+                rr_list = ['0','0']
+                rr_overs = ['0.00','0.00']
+                Match_data['Team1_score'] = "0"
+                Match_data['Team2_score'] = "0"
+                Match_data['Player_of_match'] = ''
+                Match_data['Player_of_match_team'] = ''
             # Finding Toss Report
             for toss in soup_class.find_all('h4',text='Toss'):
                 toss_report = str(toss).split('\"')[1]
@@ -170,7 +217,15 @@ if __name__ == '__main__':
                     Match_data['Season'] = season
                     # print("{} is played between {},scored {} and {} scored {} at {} on {} and the result is {} and pom is {} from {}, and toss report is {} and season is {}".format(contents[0],team1,team1_score,team2,team2_score,venue,date,result,player_of_match,pom_team,toss_Match_data.text,season))
                     print (Match_data)
+                    Match_data.clear()
                     rr_list.clear()
                     rr_overs.clear()
+                    player_of_match = ""
+                    pom_team = ""
+                    # match_data_holder.append(Match_data)
+                    # print (match_data_holder)
                     # exit(0)
     print (c) # Total Matches of the season
+    # print(match_data_holder)
+    # print (len(match_data_holder))
+    # csv_write(match_data_holder)
