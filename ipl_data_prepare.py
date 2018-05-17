@@ -2,17 +2,12 @@ from bs4 import BeautifulSoup
 import requests
 import re
 import csv
-def csv_write(data_list):
-    with open('C:\\Users\\Soumya\\ipl_data.csv', 'w') as csvfile:
-        fieldnames = ['Field_umpire1', 'Field_umpire2','TV_umpire','Reserve_umpire','Referee','Match','Team1','Team2','Team1_score','Team1_overs','Team1_RR','Team2_score','Team2_overs','Team2_RR','Venue','Schedule','Result','Player_of_match','Player_of_match_team','Toss','Season']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-        length = len(data_list)
-        print (length)
-        for i in range(0,48,1):
-            print (data_list[i])
-            writer.writerow(data_list[i])
-        # writer.writerows(data_list)
+def csv_write(row):
+    with open('C:\\Users\\Soumya\\ipl_data.csv', 'a') as csvFile:
+        writer = csv.writer(csvFile)
+        writer.writerow(row)
+    csvFile.close()
+
 if __name__ == '__main__':
     # url = "https://en.wikipedia.org/wiki/2008_Indian_Premier_League"
     # url = 'https://en.wikipedia.org/wiki/2017_Indian_Premier_League'
@@ -30,6 +25,7 @@ if __name__ == '__main__':
     pom_team = ""
     umpire = ""
     match_data_holder = list()
+    row = list()
     c=0
     Match_data = dict()
     # Fetching Scorecard from above url
@@ -88,21 +84,29 @@ if __name__ == '__main__':
                 if len(parts_0) == 2:
                     # print ('Field Umpires - > {},{} {}'.format(parts_0[0],parts_0[1],umpire[1]))
                     Match_data['Field_umpire1'] = str(parts_0[0])
+                    row.append(Match_data['Field_umpire1'])
                     Match_data['Field_umpire2'] = str(parts_0[1]) +" "+str(umpire[1])
+                    row.append(Match_data['Field_umpire2'])
                 elif len(parts_1) == 2 and len(umpire)>=3:
                     # print ('Field Umpires - > {} {},{} {}'.format(umpire[0],parts_1[0],parts_1[1],umpire[2]))
                     Match_data['Field_umpire1'] = str(umpire[0])+" "+str(parts_1[0])
+                    row.append(Match_data['Field_umpire1'])
                     Match_data['Field_umpire2'] = str(parts_1[1])+" "+str(umpire[2])
+                    row.append(Match_data['Field_umpire2'])
                 else:
                     if (parts_1[1] == 'G'):
                         parts_1[1] = str(parts_1[1]).replace("G","GA Pratapkumar")
                         # print ('Field Umpires - > {} {},{}'.format(umpire[0],parts_1[0],parts_1[1]))
                         Match_data['Field_umpire1'] =str(umpire[0])+" "+str(parts_1[0])
+                        row.append(Match_data['Field_umpire1'])
                         Match_data['Field_umpire2'] = str(parts_1[1])
+                        row.append(Match_data['Field_umpire2'])
                     else:
                         # print ('Field Umpires - > {} {},{}'.format(umpire[0],parts_1[0],parts_1[1]))
                         Match_data['Field_umpire1'] = str(umpire[0])+" "+str(parts_1[0])
+                        row.append(Match_data['Field_umpire1'])
                         Match_data['Field_umpire2'] = str(parts_1[1])
+                        row.append(Match_data['Field_umpire2'])
             except(IndexError):
                 # print ('Field Umpires Ex - > {} {},{}'.format(umpire[0],parts_0[0],parts_0[1]))
                 raise 
@@ -114,6 +118,7 @@ if __name__ == '__main__':
                 for tv_single_umpire in soup_class.find_all('div',attrs={'class':'match-detail--right','data-reactid':str(tv_umpire)}):
                     tv_umpire = tv_single_umpire.text
                     Match_data['TV_umpire'] = tv_umpire
+                    row.append(Match_data['TV_umpire'] )
                     # print ("TV Umpire -> {}" .format(tv_umpire))
             # Finding Reserve upmires
             for reserve_umpire in soup_class.find_all('h4',text='Reserve Umpire'):
@@ -123,6 +128,7 @@ if __name__ == '__main__':
                 for reserve_single_umpire in soup_class.find_all('div',attrs={'class':'match-detail--right','data-reactid':str(reserve_umpire)}):
                     reserve_umpire = reserve_single_umpire.text
                     Match_data['Reserve_umpire'] = reserve_umpire
+                    row.append(Match_data['Reserve_umpire'])
                     # print ("Reserve Umpire -> {}" .format(reserve_umpire))
             # Finding Match Referee    
             for referee in soup_class.find_all('h4',text='Match Referee'):
@@ -132,6 +138,7 @@ if __name__ == '__main__':
                 for match_referee in soup_class.find_all('div',attrs={'class':'match-detail--right','data-reactid':str(referee)}):
                     referee = match_referee.text
                     Match_data['Referee'] = referee
+                    row.append(Match_data['Referee'])
                     # Finding Overs and Run rate played by both teams
             if (result != 'Match abandoned without a ball bowled') :
                 # print ("inn")
@@ -142,14 +149,11 @@ if __name__ == '__main__':
                         # print (team1_ov)
                         team1_ov = int(team1_ov)
                         team1_ov += 1
-                        # print (team1_ov)
                         for get_overs in soup_class.find_all('div',attrs={'class':'cell','data-reactid':str(team1_ov)}):
                             get_played_overs = get_overs.text
                             split_comma = get_played_overs.split(",")
                             rr_list.append(str(split_comma[1]).split(")")[0].split(":")[1].strip())
                             rr_overs.append(str(split_comma[0]).split("(")[1].split(" ")[0].strip())
-                            # print (rr_list)
-                            # print (rr_overs)
             else:
                 rr_list = ['0','0']
                 rr_overs = ['0.00','0.00']
@@ -158,22 +162,16 @@ if __name__ == '__main__':
                 Match_data['Player_of_match'] = None
                 Match_data['Player_of_match_team'] = None
             if (result != 'No result (abandoned with a toss)') :
-                # print ("inn NR")
                 for dat in soup_class.find_all('div', class_='cell'):
-                    # print ("Inside Dat")
                     if dat.text == 'TOTAL':
                         team1_ov = dat['data-reactid']
-                        # print (team1_ov)
                         team1_ov = int(team1_ov)
                         team1_ov += 1
-                        # print (team1_ov)
                         for get_overs in soup_class.find_all('div',attrs={'class':'cell','data-reactid':str(team1_ov)}):
                             get_played_overs = get_overs.text
                             split_comma = get_played_overs.split(",")
                             rr_list.append(str(split_comma[1]).split(")")[0].split(":")[1].strip())
                             rr_overs.append(str(split_comma[0]).split("(")[1].split(" ")[0].strip())
-                            # print (rr_list)
-                            # print (rr_overs)
             else:
                 rr_list = ['0','0']
                 rr_overs = ['0.00','0.00']
@@ -200,32 +198,43 @@ if __name__ == '__main__':
                     # Finding overs
                     # Data Builder    
                     Match_data['Match'] = contents[0]
+                    row.append(Match_data['Match'])
                     Match_data['Team1'] = team1
+                    row.append(Match_data['Team1'])
                     Match_data['Team2'] = team2
+                    row.append(Match_data['Team2'])
                     Match_data['Team1_score'] = team1_score
+                    row.append(Match_data['Team1_score'])
                     Match_data['Team1_overs'] = rr_overs[0]
+                    row.append(Match_data['Team1_overs'])
                     Match_data['Team1_RR'] = rr_list[0]
+                    row.append(Match_data['Team1_RR'])
                     Match_data['Team2_score'] = team2_score.split(" ")[0]
+                    row.append(Match_data['Team2_score'])
                     Match_data['Team2_overs'] = rr_overs[1]
+                    row.append(Match_data['Team2_overs'])
                     Match_data['Team2_RR'] = rr_list[1]
+                    row.append(Match_data['Team2_RR'])
                     Match_data['Venue'] = venue
+                    row.append( Match_data['Venue'])
                     Match_data['Schedule'] = date
+                    row.append(Match_data['Schedule'])
                     Match_data['Result'] = result
+                    row.append(Match_data['Result'])
                     Match_data['Player_of_match'] = player_of_match
+                    row.append(Match_data['Player_of_match'])
                     Match_data['Player_of_match_team'] = pom_team
+                    row.append(Match_data['Player_of_match_team'])
                     Match_data['Toss'] = toss
+                    row.append(Match_data['Toss'])
                     Match_data['Season'] = season
-                    # print("{} is played between {},scored {} and {} scored {} at {} on {} and the result is {} and pom is {} from {}, and toss report is {} and season is {}".format(contents[0],team1,team1_score,team2,team2_score,venue,date,result,player_of_match,pom_team,toss_Match_data.text,season))
-                    print (Match_data)
-                    Match_data.clear()
+                    row.append(Match_data['Season'])
+                    # Writes to file
+                    csv_write(row)
+                    # Re-initialization for consecutive loop, to remove cached data
+                    row.clear()
                     rr_list.clear()
                     rr_overs.clear()
                     player_of_match = ""
                     pom_team = ""
-                    # match_data_holder.append(Match_data)
-                    # print (match_data_holder)
-                    # exit(0)
     print (c) # Total Matches of the season
-    # print(match_data_holder)
-    # print (len(match_data_holder))
-    # csv_write(match_data_holder)
