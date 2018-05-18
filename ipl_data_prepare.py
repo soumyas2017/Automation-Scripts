@@ -9,10 +9,10 @@ def csv_write(row):
     csvFile.close()
 
 if __name__ == '__main__':
-    # url = "https://en.wikipedia.org/wiki/2008_Indian_Premier_League"
+    url = "https://en.wikipedia.org/wiki/2008_Indian_Premier_League"
     # url = 'https://en.wikipedia.org/wiki/2017_Indian_Premier_League'
     # url = 'https://en.wikipedia.org/wiki/2018_Indian_Premier_League'
-    url = 'https://en.wikipedia.org/wiki/2012_Indian_Premier_League'
+    # url = 'https://en.wikipedia.org/wiki/2012_Indian_Premier_League'
     r = requests.get(url)
     data  = r.text
     soup = BeautifulSoup(data,'lxml')
